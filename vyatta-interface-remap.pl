@@ -47,7 +47,7 @@ foreach my $node (@$nodes) {
 #
 # Step 2: Examine collected information and abort cloning if needed
 #
-my $new_if_number 	= length(@if_names) + 1;
+my $new_if_number 	= length(@if_names);
 if ($new_if_number % 2 != 0) { die("Odd interface number: $new_if_number\n"); }
 my $old_if_number 	= $new_if_number / 2;
 my $if_c		= 1;
