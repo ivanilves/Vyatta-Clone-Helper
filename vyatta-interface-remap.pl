@@ -53,7 +53,7 @@ my $old_if_number 	= $new_if_number / 2;
 my $if_c		= 1;
 foreach my $if_name (@if_names) {
   if ($if_c <= $old_if_number) {
-    if (($if_presense_state{$if_name} == FALSE) && ($if_config_state{$if_name} == TRUE))  { } else { die("Old interface present or not configured: $if_name\n"); }
+    if ($if_presense_state{$if_name} == FALSE) { } else { die("Old interface present: $if_name\n"); }
   } else {
     if (($if_presense_state{$if_name} == TRUE)  && ($if_config_state{$if_name} == FALSE)) { } else { die("New interface absent or configured: $if_name\n"); }
   }
