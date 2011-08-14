@@ -21,6 +21,7 @@ $xcp->parse($config_file);
 my @if_names		= ();
 my %if_presense_state 	= ();
 my %if_config_state	= ();
+my $present_if_number	= 0;
 
 #
 # Step 1: Collect information about interfaces
@@ -33,7 +34,10 @@ foreach my $node (@$nodes) {
     @if_names 				= (@if_names, $if_name);
     $if_presense_state{$if_name} 	= FALSE;
     $if_config_state{$if_name}   	= FALSE;
-    if (`/sbin/ifconfig $if_name 2>/dev/null`) { $if_presense_state{$if_name} = TRUE; }
+    if (`/sbin/ifconfig $if_name 2>/dev/null`) {
+      $if_presense_state{$if_name} = TRUE;
+      $present_if_number++;
+    }
     my $child_nodes 			= $node->{'children'};
     foreach my $child_node (@$child_nodes) {
       if ($child_node->{'name'} !~ m/^hw-id .*/) {
@@ -48,6 +52,7 @@ foreach my $node (@$nodes) {
 # Step 2: Examine collected information and abort cloning if needed
 #
 my $new_if_number 	= scalar(@if_names);
+if ($new_if_number == $present_if_number) { die("All interfaces present. Total: $present_if_number\n"); }
 if ($new_if_number % 2 != 0) { die("Odd interface number: $new_if_number\n"); }
 my $old_if_number 	= $new_if_number / 2;
 my $if_c		= 1;
@@ -77,7 +82,8 @@ foreach my $if_name (@if_names) {
     }
     $xcp->delete_child($node->{'children'}, $hw_id);
   } else {
-    my $node = $xcp->get_node(['interfaces']);
+    my $node 		= $xcp->get_node(['interfaces']);
+    my $sub_node 	= $xcp->get_node(['interfaces', 'ethernet ' . $if_name]);
     $xcp->delete_child($node->{'children'}, 'ethernet ' . $if_name);
   }
   $if_c++;
