@@ -1,1 +1,37 @@
-Vyatta cloning made easy!
+Summary:
+========
+When you clone Vyatta system, your destination cloned machine
+gets it ethernet interfaces "shifted".
+For example, if you have nicely configured eth0 and eth1 on source system,
+you will get unconfigured empty useless eth2 and eth3 on destination system,
+while your eth0 and eth1 will be still present in config, but not available.
+
+I know, it's not a bug, it's a feature, ethernet interface hw-id persists
+in config.boot and when you clone system you get another couple of interfaces,
+which will be indexed just after your old ethernet interfaces.
+
+But imagine what means this feature for geeky  virtual lab owner,
+who likes to clone virtual machines by pressing one simple button on his
+hypervisor console and don't want to mess with hw-id every time he clones.
+Since Vyatta claims itself as virtualization-friendly solution (and it is!),
+IMHO not allowing simple one-click cloning is a major strategical miss,
+even though not strictly a bug.
+
+
+Proposed solution:
+==================
+Thanks to Vyatta clean and transparent structure, I was able to create
+simple package(attached), which examines ethernet interface state on boot, 
+detects cloned system, re-maps ethernet interfaces and reboots system (once).
+After this one and only reboot system becomes sane and works as planned.
+Package is wrapped around perl script based on XorpConfigParser
+and it requires no configuration, just install and use:
+http://www.vyatta4people.org/vyatta-clone-helper/
+GitHub: https://github.com/vyatta4people/Vyatta-Clone-Helper
+I propose to include this or something like this to official Vyatta release.
+Please, don't hurt virtual lab owners, cause they really love Vyatta :)
+
+
+Other thoughts:
+===============
+It may be nice to also implement automatic hostname generation for clones...
