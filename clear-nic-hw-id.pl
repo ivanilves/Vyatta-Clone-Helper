@@ -1,10 +1,9 @@
 #!/usr/bin/perl
 #
-# Vyatta Cloning Helper: Clear NIC hw-id [on boot]
+# Vyatta Clone Helper: Clear NIC hw-id [on boot]
 #
 use strict;
 use POSIX qw(strftime);
-use Switch;
 use File::Copy;
 use lib "/opt/vyatta/share/perl5/";
 use XorpConfigParser;
@@ -52,9 +51,9 @@ foreach my $node (@$nodes) {
 }
 
 #
-# Step 2: Examine collected information and abort remap if needed
+# Step 2: Examine collected information and abort script execution if needed
 #
-my $mode_of_operation	= REMAP; # Default mode is remap
+my $mode_of_operation	= REMAP; # Yeap, default mode is remap
 my $new_if_number 	= scalar(@if_names);
 my $old_if_number       = $new_if_number;
 if ($new_if_number == $present_if_number) { $mode_of_operation = CLEAR; } # All interfaces present, no remap needed, we just clear hw-id from every [ethernet] interface
@@ -67,7 +66,7 @@ if ($mode_of_operation == REMAP) {
     if ($if_c <= $old_if_number) {
       if ($if_presense_state{$if_name} == FALSE) { } else { die("Old interface present: $if_name\n"); }
     } else {
-      if (($if_presense_state{$if_name} == TRUE)  && ($if_config_state{$if_name} == FALSE)) { } else { die("New interface absent or configured: $if_name\n"); }
+      if (($if_presense_state{$if_name} == TRUE) && ($if_config_state{$if_name} == FALSE)) { } else { die("New interface absent or configured: $if_name\n"); }
     }
     $if_c++;
   }
@@ -78,7 +77,7 @@ if ($mode_of_operation == REMAP) {
 #
 my $if_c = 1;
 foreach my $if_name (@if_names) {
-  if ($if_c <= $old_if_number) { # Clear hw-id
+  if ($if_c <= $old_if_number) { # For these interfaces we just clear hw-id
     my $node 		= $xcp->get_node(['interfaces', 'ethernet ' . $if_name]);
     my $child_nodes 	= $node->{'children'};
     my $hw_id 		= '';
@@ -89,7 +88,7 @@ foreach my $if_name (@if_names) {
       }
     }
     $xcp->delete_child($node->{'children'}, $hw_id);
-    } else { # Delete unneeded interfaces
+    } else { # Delete unneeded interfaces (NB! In clear mode we never get here!)
       my $node 		= $xcp->get_node(['interfaces']);
       my $sub_node 	= $xcp->get_node(['interfaces', 'ethernet ' . $if_name]);
       $xcp->delete_child($node->{'children'}, 'ethernet ' . $if_name);
