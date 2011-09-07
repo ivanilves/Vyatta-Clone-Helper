@@ -56,7 +56,7 @@ foreach my $node (@$nodes) {
 my $mode_of_operation	= REMAP; # Yeap, default mode is remap
 my $new_if_number 	= scalar(@if_names);
 my $old_if_number       = $new_if_number;
-if ($new_if_number == $present_if_number) { $mode_of_operation = CLEAR; } # All interfaces present, no remap needed, we just clear hw-id from every [ethernet] interface
+if (($new_if_number == $present_if_number) or ($present_if_number == 0)) { $mode_of_operation = CLEAR; } # All interfaces present, no remap needed, we just clear hw-id from every [ethernet] interface
 if (($new_if_number % 2 != 0) and ($mode_of_operation == REMAP)) { die("Odd interface number: $new_if_number\n"); }
 # Additional sanity check for remap mode
 if ($mode_of_operation == REMAP) {
@@ -88,7 +88,7 @@ foreach my $if_name (@if_names) {
       }
     }
     $xcp->delete_child($node->{'children'}, $hw_id);
-    } else { # Delete unneeded interfaces (NB! In clear mode we never get here!)
+    } else { # Delete excess interfaces (NB! In clear mode we never get here!)
       my $node 		= $xcp->get_node(['interfaces']);
       my $sub_node 	= $xcp->get_node(['interfaces', 'ethernet ' . $if_name]);
       $xcp->delete_child($node->{'children'}, 'ethernet ' . $if_name);
